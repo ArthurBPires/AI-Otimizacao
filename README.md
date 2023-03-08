@@ -15,14 +15,14 @@
 
 ## 1. Genética da realeza
  Uma execução bem sucedida com 0 ataques entre rainhas foi obtida com os seguintes parâmetros:
- g: 40
- n: 150
- k: 10
- m: 0.5
- e: 5
+ - g: 40
+ - n: 150
+ - k: 10
+ - m: 0.5
+ - e: 5
 
- Os resultados da execução podem ser vistos em ga.png
- Para executar o código com esses parametros e obter um novo gráfico, basta executar 'python eight_queens.py'
+ ### Os resultados da execução podem ser vistos em ga.png
+ ### Para executar o código com esses parametros e obter um novo gráfico, basta executar 'python eight_queens.py'
 
 ## 2. Não me perguntes onde fica o Alegrete...
  Uma execução bem sucedida com erro quadrático médio de 10.04645491085077 foi obtida com os seguintes parâmetros:
