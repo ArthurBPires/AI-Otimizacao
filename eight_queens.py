@@ -28,11 +28,6 @@ def selecao(P, k):
         melhores.append(tournament(participantes)) 
     return melhores[0], melhores[1]
 
-def top(P):
-    """
-    Executa o torneio nos participantes e retorna o melhor
-    """
-    return tournament(P)
 
 def numeroConflitos(P):
     listaConflitos = []
@@ -67,10 +62,14 @@ def evaluate(individual):
     :return:int numero de ataques entre rainhas no individuo recebido
     """
     ataques = 0
-    for i, rainha in enumerate(individual, start=1):
-        for j, rainha2 in enumerate(individual[i:], start=1):
-            if rainha == rainha2 or rainha2 == rainha + j or rainha2 == rainha - j :
+    coluna=1
+    for rainha in individual:
+        linha=1
+        for rainha2 in individual[coluna:]:
+            if rainha == rainha2 or rainha2 == rainha + linha or rainha2 == rainha - linha :
                 ataques +=1
+            linha += 1
+        coluna += 1
 
     return ataques
 
@@ -82,11 +81,12 @@ def tournament(participants):
     :param participants:list - lista de individuos
     :return:list melhor individuo da lista recebida
     """
-    melhor = participants[0]
-    for candidato in participants[1:]:
-        if evaluate(melhor) > evaluate(candidato):
-            melhor = candidato
-    return melhor
+    best = participants[0]
+    for candidate in participants:
+        if evaluate(best) > evaluate(candidate):
+            best = candidate
+
+    return best
 
 
 def crossover(parent1, parent2, index):
@@ -103,11 +103,15 @@ def crossover(parent1, parent2, index):
     :param index:int
     :return:list,list
     """
-    temp = parent1[:index]
-    temp.extend(parent2[index:])
-    temp2 = parent2[:index]
-    temp2.extend(parent1[index:])
-    return temp, temp2
+    head1 = parent1[:index]
+    tail1 = parent1[index:]
+    head2 = parent2[:index]
+    tail2 = parent2[index:]
+
+    out1 = head1 + tail2
+    out2 = head2 + tail1
+
+    return out1, out2
 
 
 def mutate(individual, m):
@@ -120,10 +124,10 @@ def mutate(individual, m):
     :return:list - individuo apos mutacao (ou intacto, caso a prob. de mutacao nao seja satisfeita)
     """
     if random.random() < m:
-        indice = random.randrange(8)
-        individual[indice] = random.randint(1,8)
+        individual[random.randrange(8)] = random.randint(1,8)
     return individual
 
+conflitosPorGeracao = []
 
 def run_ga(g, n, k, m, e):
     """
@@ -158,9 +162,7 @@ def run_ga(g, n, k, m, e):
 
         conflitosPorGeracao.append(numeroConflitos(p))
 
-    return top(p)
-
-conflitosPorGeracao = []
+    return tournament(p)
 
 if __name__ == '__main__':
     g = 40
