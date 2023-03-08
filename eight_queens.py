@@ -43,10 +43,14 @@ def evaluate(individual):
     :return:int numero de ataques entre rainhas no individuo recebido
     """
     ataques = 0
-    for i, rainha in enumerate(individual, start=1):
-        for j, rainha2 in enumerate(individual[i:], start=1):
-            if rainha == rainha2 or rainha2 == rainha + j or rainha2 == rainha - j :
+    coluna=1
+    for rainha in individual:
+        linha=1
+        for rainha2 in individual[coluna:]:
+            if rainha == rainha2 or rainha2 == rainha + linha or rainha2 == rainha - linha :
                 ataques +=1
+            linha += 1
+        coluna += 1
 
     return ataques
 
@@ -79,10 +83,13 @@ def crossover(parent1, parent2, index):
     :param index:int
     :return:list,list
     """
-    filho1 = parent1[:index]
-    filho1.extend(parent2[index:])
-    filho2 = parent2[:index]
-    filho2.extend(parent1[index:])
+    head1 = parent1[:index]
+    tail1 = parent1[index:]
+    head2 = parent2[:index]
+    tail2 = parent2[index:]
+
+    filho1 = head1 + tail2
+    filho2 = head2 + tail1
 
     return filho1, filho2
 
@@ -100,6 +107,7 @@ def mutate(individual, m):
         individual[ random.randrange(8) ] = random.randint(1,8)
     return individual
 
+conflitosPorGeracao = []
 
 def run_ga(g, n, k, m, e):
     """
@@ -147,6 +155,7 @@ def run_ga(g, n, k, m, e):
 
 conflitosPorGeracao = []
 
+#Cria gráfico que é pedido na especificação
 if __name__ == '__main__':
     g = 40
     n = 150
