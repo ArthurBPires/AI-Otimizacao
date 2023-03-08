@@ -1,24 +1,26 @@
 import numpy as np
 
-##########################################################
-# Funções auxiliares
-def derivadaTheta(theta_0, theta_1, data, theta):
+
+def derivadaTheta(theta_0, theta_1, data, final):
     n = len(data)
     parciais = []
-    for x ,y in data:
-        aux_theta_1 = theta_1 * x
-        if theta == 0:
-            parciais.append((theta_0 + aux_theta_1) - y)
-        elif theta == 1:
-            parciais.append(((theta_0 + aux_theta_1) - y) * x)
-        else:
-            raise AttributeError
+    for x,y in data:
+
+        aux = (theta_0 + theta_1 * x) - y
+
+        if final == 0:
+            parciais.append(aux)
+
+        elif final == 1:
+            parciais.append(aux * x)
 
     somaDasParciais =  sum(parciais)
     resultado = 2/n * somaDasParciais
-    #print(f"derivadaTheta {resultado}")
+    
     return resultado
-##########################################################
+
+
+
 
 def compute_mse(theta_0, theta_1, data):
     """
@@ -28,11 +30,12 @@ def compute_mse(theta_0, theta_1, data):
     :param data: np.array - matriz com o conjunto de dados, x na coluna 0 e y na coluna 1
     :return: float - o erro quadratico medio
     """
+
     n = len(data)
     parciais = []
-    for x ,y in data:
-        aux_theta_1 = theta_1 * x
-        erro = (theta_0 + aux_theta_1) - y
+
+    for x,y in data:
+        erro = (theta_0 + theta_1 * x) - y
         erro = erro * erro
         parciais.append(erro)
     
@@ -52,8 +55,10 @@ def step_gradient(theta_0, theta_1, data, alpha):
 
     deltaTheta_0 = (alpha * derivadaTheta(theta_0, theta_1, data, 0))
     deltaTheta_1 = (alpha * derivadaTheta(theta_0, theta_1, data, 1))
+
     novo_theta_0 = theta_0 - deltaTheta_0
     novo_theta_1 = theta_1 - deltaTheta_1
+
     return novo_theta_0, novo_theta_1
 
 
@@ -72,10 +77,13 @@ def fit(data, theta_0, theta_1, alpha, num_iterations):
     :param num_iterations: int - numero de épocas/iterações para executar a descida de gradiente
     :return: list,list - uma lista com os theta_0 e outra com os theta_1 obtidos ao longo da execução
     """
-    thetas0 = []
-    thetas1 = []
+    thetas_0 = []
+    thetas_1 = []
+
     for _ in range(num_iterations):
+
         theta_0, theta_1 = step_gradient(theta_0, theta_1, data, alpha)
-        thetas0.append(theta_0)
-        thetas1.append(theta_1)
-    return thetas0, thetas1
+        thetas_0.append(theta_0)
+        thetas_1.append(theta_1)
+
+    return thetas_0, thetas_1

@@ -1,61 +1,37 @@
 import random
 import matplotlib.pyplot as plt
 
-##############################################################################
-# Funções Auxiliares
-def aleatorios(n):
-    """
-    Gera n populações aleatórias
-    """
-    lista = []
-    for _ in range(n):
-        temp = []
-        for _ in range(8):
-            temp.append(random.randint(1,8))
-        lista.append(temp)
-    return lista
-
+#Seleciona k indivíduos aleatóriamente e devolve os dois melhores encontrados.
 def selecao(P, k):
-    """
-    Seleciona k populações aleatórias duas vezes e devolve os dois
-    melhores encontrados.
-    """
-    melhores = []
+
+    melhoresParticipantesSorteados = []
+
     for _ in range(2):
-        participantes = []
+        participantesSorteados = []
+
         for _ in range(k):
-            participantes.append(P[random.randrange(len(P))])
-        melhores.append(tournament(participantes)) 
-    return melhores[0], melhores[1]
+            participanteEscolhido = P[random.randrange(len(P))]
+            participantesSorteados.append(participanteEscolhido)
 
-def top(P):
-    """
-    Executa o torneio nos participantes e retorna o melhor
-    """
-    return tournament(P)
+        melhoresParticipantesSorteados.append(tournament(participantesSorteados)) 
 
-def numeroConflitos(P):
-    listaConflitos = []
-    for elemento in P:
-            conflitos = evaluate(elemento)
-            listaConflitos.append(conflitos)
-    return listaConflitos
+    return melhoresParticipantesSorteados[0], melhoresParticipantesSorteados[1]
 
-def imprimeGrafico(max, med, min, g):
-    plt.plot([i for i in range(g)], max, color="red", label="max conflitos")
-    plt.plot([i for i in range(g)], med, color="blue", label="media conflitos")
-    plt.plot([i for i in range(g)], min, color="green", label="min conflitos")
-    plt.legend()
-
-    plt.xlabel('Gerações')
-    plt.ylabel('Conflitos')
-
-    plt.title('Resultados da execução')
-
-    plt.show()
+def populacaoInicial(n):
+    populacao = []
+    for _ in range(n):
+        novoTabuleiro = []
+        for _ in range(8):
+            novoTabuleiro.append(random.randint(1,8))
+        populacao.append(novoTabuleiro)
+    return populacao
 
 
-##############################################################################
+    
+
+
+
+
 
 def evaluate(individual):
     """
@@ -82,11 +58,11 @@ def tournament(participants):
     :param participants:list - lista de individuos
     :return:list melhor individuo da lista recebida
     """
-    melhor = participants[0]
-    for candidato in participants[1:]:
-        if evaluate(melhor) > evaluate(candidato):
-            melhor = candidato
-    return melhor
+    melhorParticipante = participants[0]
+    for participante in participants[1:]:
+        if evaluate(melhorParticipante) > evaluate(participante):
+            melhorParticipante = participante
+    return melhorParticipante
 
 
 def crossover(parent1, parent2, index):
@@ -103,11 +79,12 @@ def crossover(parent1, parent2, index):
     :param index:int
     :return:list,list
     """
-    temp = parent1[:index]
-    temp.extend(parent2[index:])
-    temp2 = parent2[:index]
-    temp2.extend(parent1[index:])
-    return temp, temp2
+    filho1 = parent1[:index]
+    filho1.extend(parent2[index:])
+    filho2 = parent2[:index]
+    filho2.extend(parent1[index:])
+
+    return filho1, filho2
 
 
 def mutate(individual, m):
@@ -120,8 +97,7 @@ def mutate(individual, m):
     :return:list - individuo apos mutacao (ou intacto, caso a prob. de mutacao nao seja satisfeita)
     """
     if random.random() < m:
-        indice = random.randrange(8)
-        individual[indice] = random.randint(1,8)
+        individual[ random.randrange(8) ] = random.randint(1,8)
     return individual
 
 
@@ -136,29 +112,38 @@ def run_ga(g, n, k, m, e):
     :return:list - melhor individuo encontrado
     """
 
-    p = aleatorios(n)
+    p = populacaoInicial(n)
     for _ in range(g):
 
-        pl = []
+        pd = []
 
         copia_populacao = p
+
         for _ in range(e):
-            if len(pl) < n:
+            if len(pd) < n:
                 melhor = tournament(copia_populacao)
                 copia_populacao.remove(melhor)
-                pl.append(melhor)
+                pd.append(melhor)
 
-        while len(pl) < n:
+        while len(pd) < n:
             p1, p2 = selecao(p, k)
             o1, o2, = crossover(p1, p2, random.randrange(8))
-            o1, o2 = mutate(o1, m), mutate(o2, m)
-            pl.append(o1)
-            pl.append(o2)
-        p = pl
+            o1 = mutate(o1, m)
+            o2 = mutate(o2, m)
+            pd.append(o1)
+            pd.append(o2)
 
-        conflitosPorGeracao.append(numeroConflitos(p))
+        p = pd
 
-    return top(p)
+        #Calcula quantidade de conflitos nessa geração
+        conflitos = []
+        for elemento in p:
+            conflito = evaluate(elemento)
+            conflitos.append(conflito)
+        
+        conflitosPorGeracao.append(conflitos)
+
+    return tournament(p)
 
 conflitosPorGeracao = []
 
@@ -171,15 +156,24 @@ if __name__ == '__main__':
 
     run_ga(g, n, k, m, e)
 
-    quantMaximaConflitos = []
-    quantMediaConflitos = []
-    quantMinimaConflitos = []
+    minConflitos = []
+    mediaConflitos = []
+    maxConflitos = []
 
     for conflitos in conflitosPorGeracao:
-        quantMaximaConflitos.append(max(conflitos))
-        quantMediaConflitos.append(sum(conflitos) / n)
-        quantMinimaConflitos.append(min(conflitos))
+        minConflitos.append(min(conflitos))
+        mediaConflitos.append(sum(conflitos) / n)
+        maxConflitos.append(max(conflitos))
 
-    imprimeGrafico(quantMaximaConflitos, quantMediaConflitos, quantMinimaConflitos, g)
+    plt.plot(list(range(g)), minConflitos, color="green", label="Min conflitos")
+    plt.plot(list(range(g)), mediaConflitos, color="blue", label="Media conflitos")
+    plt.plot(list(range(g)), maxConflitos, color="red", label="Max conflitos")
+    plt.legend()
+
+    plt.title('Conflitos por geração')
+    plt.ylabel('Conflitos')
+    plt.xlabel('Gerações')
+
+    plt.show()
 
 
